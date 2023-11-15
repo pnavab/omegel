@@ -1,6 +1,16 @@
 version: '3'
 services:
-  omegel:
+  frontend:
+    container_name: frontend
+    build: ./app
+    ports: 
+    - 3000:3000
+    volumes:
+      - ./app/src/:/app/src/
+    depends_on:
+      - backend
+  backend:
+    container_name: backend
     build: ./server
     ports:
       - 8000:8000
