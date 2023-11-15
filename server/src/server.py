@@ -39,7 +39,7 @@ app = FastAPI()
 connection_manager = ConnectionManager()
 
 
-@app.websocket("/messaging")
+@app.websocket_route("/messaging")
 async def websocket_endpoint(websocket: WebSocket):
     await connection_manager.connect(websocket)
     try:
@@ -53,4 +53,4 @@ async def websocket_endpoint(websocket: WebSocket):
         await connection_manager.broadcast(json.dumps({ "type": "disconnected", "id": id }))
 
 if __name__ == "__main__":
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("server:app", port=8000, reload=True)

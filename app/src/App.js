@@ -12,7 +12,7 @@ const App = () => {
 
   useEffect(() => {
     const initializeWebSocket = () => {
-      const newSocket = new WebSocket('ws://localhost:8000/messaging');
+      const newSocket = new WebSocket(`ws://10.8.0.16:8000/messaging`);
 
       newSocket.onopen = () => {
         console.log('connected');
