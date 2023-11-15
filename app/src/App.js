@@ -8,6 +8,7 @@ const App = () => {
   const [showSnackBar, setShowSnackBar] = useState(false);
   const [snackBarMessage, setSnackBarMessage] = useState('');
   const [snackBarStatus, setSnackBarStatus] = useState('');
+  const [userID, setUserId] = useState('');
 
   useEffect(() => {
     const initializeWebSocket = () => {
@@ -59,7 +60,7 @@ const App = () => {
 
   const handleSendMessage = () => {
     if (messageText === '') return;
-    socket.send(JSON.stringify({ text: messageText, senderId }));
+    socket.send(JSON.stringify({ text: messageText, userID }));
 
     setMessageText('');
   };
@@ -76,26 +77,34 @@ const App = () => {
 
   return (
     <div>
-      {/* Your UI components go here */}
       <div>
         <input
+          defaultValue="message"
           type="text"
           value={messageText}
           onChange={(e) => setMessageText(e.target.value)}
+        />
+        <br></br>
+        <input
+          defaultValue="userID"
+          type="text"
+          value={userID}
+          onChange={(e) => setUserId(e.target.value)}
         />
         <button onClick={handleSendMessage}>Send</button>
       </div>
       <div>
         <ul>
           {messages.map((msg, index) => (
-            <li key={index}>{msg.text}</li>
+            <li>{msg.userID} : {msg.text}</li>
           ))}
+          {console.log(messages)}
         </ul>
       </div>
       {showSnackBar && (
         <div>
-          <p>{snackBarMessage}</p>
-          <p>{snackBarStatus}</p>
+          <p>{snackBarMessage} message</p>
+          <p>{snackBarStatus} status</p>
         </div>
       )}
     </div>

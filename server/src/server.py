@@ -12,6 +12,7 @@ class ConnectionManager:
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         id = str(uuid.uuid4())
+        print(id)
         self.active_connections[id] = websocket
         
         await self.send_message_to(websocket, json.dumps({ "type": "connect", "id": id }))
