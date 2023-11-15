@@ -1,0 +1,8 @@
+version: '3'
+services:
+  omegel:
+    build: ./server
+    ports:
+      - 8000:8000
+    volumes:
+      - ./server/src/server.py:/app/src/server.py
