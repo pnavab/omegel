@@ -38,7 +38,6 @@ app = FastAPI()
 
 connection_manager = ConnectionManager()
 
-
 @app.websocket("/messaging")
 async def websocket_endpoint(websocket: WebSocket):
     await connection_manager.connect(websocket)
@@ -46,11 +45,20 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             data = await websocket.receive_text()
             print(f"Received data {data}")
+            f = open("messages", "a+")
+            f.write(data + "\n")
+            f.close() 
             await connection_manager.broadcast(data)
     except WebSocketDisconnect:
         print(f"client disconnected")
         id = connection_manager.disconnect(websocket)
         await connection_manager.broadcast(json.dumps({ "type": "disconnected", "id": id }))
+
+@app.get("/prevmessages")
+def prev_messages():
+    with open("messages", "r") as p: s = p.read()
+    return {"messages" : s}
+
 
 if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
