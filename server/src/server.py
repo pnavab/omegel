@@ -1,15 +1,23 @@
+import sqlite3
+import json
+from dataclasses import dataclass
+import ast
+import uuid
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-import uuid
-import json
-from dataclasses import dataclass
+
+import db
 
 @dataclass
 class ConnectionManager:
+    conn = None
+    database = None
     def __init__(self) -> None:
         self.active_connections: dict = {}
-    
+        self.database = db.db()
+        
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         id = str(uuid.uuid4())
@@ -43,9 +51,7 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*']
 )
-
 connection_manager = ConnectionManager()
-
 
 @app.websocket_route("/messaging")
 async def websocket_endpoint(websocket: WebSocket):
@@ -54,9 +60,8 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             data = await websocket.receive_text()
             print(f"Received data {data}")
-            f = open("messages", "a+")
-            f.write(data + "\n")
-            f.close() 
+            copy = ast.literal_eval(data)
+            connection_manager.database.write_message(copy["userID"], copy["text"])
             await connection_manager.broadcast(data)
     except WebSocketDisconnect:
         print(f"client disconnected")
@@ -65,9 +70,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.get("/prevmessages")
 def prev_messages():
-    with open("messages", "r") as p: s = p.read()
-    return {"messages" : s}
-
+    return {"messages" : connection_manager.database.get_messages()}
 
 if __name__ == "__main__":
     uvicorn.run("server:app", port=8000, reload=True)
