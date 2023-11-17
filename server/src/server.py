@@ -1,4 +1,5 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import uuid
 import json
@@ -36,9 +37,17 @@ class ConnectionManager:
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_methods=['*'],
+    allow_headers=['*']
+)
+
 connection_manager = ConnectionManager()
 
-@app.websocket("/messaging")
+
+@app.websocket_route("/messaging")
 async def websocket_endpoint(websocket: WebSocket):
     await connection_manager.connect(websocket)
     try:
@@ -61,4 +70,4 @@ def prev_messages():
 
 
 if __name__ == "__main__":
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("server:app", port=8000, reload=True)
