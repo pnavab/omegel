@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 const App = () => {
   const [socket, setSocket] = useState(null);
-  const [senderId, setSenderId] = useState('');
+  const [previousMessages, setPreviousMessages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState('');
   const [showSnackBar, setShowSnackBar] = useState(false);
@@ -13,10 +13,11 @@ const App = () => {
   useEffect(() => {
     const initializeWebSocket = () => {
       const newSocket = new WebSocket(`ws://${window.location.hostname}:8000/messaging`);
-
-      newSocket.onopen = () => {
+      newSocket.onopen = async () => {
         console.log('connected');
         handleShowSnackBar('Connected', 'Success');
+        let p = await (await fetch(`http://${window.location.hostname}:8000/prevmessages`)).json()
+        setPreviousMessages(p.messages);
       };
 
       newSocket.onmessage = (event) => {
@@ -94,11 +95,15 @@ const App = () => {
         <button onClick={handleSendMessage}>Send</button>
       </div>
       <div>
-        <ul>
-          {messages.map((msg, index) => (
-            <li>{msg.userID} : {msg.text}</li>
+        <ul style={{listStyleType: "none"}}>
+          {messages.length > 0 && (
+            <li key={0}>{messages[0].userID} : {messages[0].text}</li>
+          )}
+        </ul>
+        <ul style={{listStyleType: "none"}}>
+          {previousMessages.map((msg, index) => (
+            <li>{msg[0]} : {msg[1]}</li>
           ))}
-          {console.log(messages)}
         </ul>
       </div>
       {showSnackBar && (
